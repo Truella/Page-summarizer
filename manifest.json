@@ -20,5 +20,6 @@
 			"matches": ["<all_urls>"],
 			"js": ["content.js"]
 		}
-	]
+	],
+	"host_permissions": ["https://page-summarizer-proxy.vercel.app/*"]
 }
