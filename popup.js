@@ -1,0 +1,1 @@
+console.log("AI Summarizer popup loaded.");

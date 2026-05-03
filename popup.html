@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Summarizer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <div class="popup-wrapper">
+
+    <!-- HEADER — always visible -->
+    <header class="popup-header">
+      <div class="logo-mark">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="7" height="4" rx="1.5" fill="currentColor" opacity="0.9"/>
+          <rect x="1" y="7" width="16" height="2" rx="1" fill="currentColor" opacity="0.6"/>
+          <rect x="1" y="11" width="12" height="2" rx="1" fill="currentColor" opacity="0.6"/>
+          <rect x="1" y="15" width="8" height="2" rx="1" fill="currentColor" opacity="0.4"/>
+        </svg>
+      </div>
+      <span class="popup-title">AI Summarizer</span>
+    </header>
+
+    <!-- PAGE META — shown in idle, success, cached, error -->
+    <div class="page-meta" id="pageMeta">
+      <p class="page-title" id="pageTitle">How to Build a Chrome Extension</p>
+      <span class="page-domain" id="pageDomain">developer.chrome.com</span>
+    </div>
+
+    <div class="state-panel" id="stateIdle">
+      <p class="idle-hint">Click below to extract and summarize this page using AI.</p>
+      <button class="btn-primary" id="summarizeBtn" aria-label="Summarize this page">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+          <path d="M7.5 1v13M1 7.5h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        Summarize Page
+      </button>
+    </div>
+
+    <div class="state-panel hidden" id="stateLoading" aria-live="polite" aria-busy="true">
+      <div class="spinner" role="status" aria-label="Loading summary">
+        <div class="spinner-ring"></div>
+      </div>
+      <p class="loading-label">Reading page content…</p>
+      <p class="loading-sub" id="loadingStep">Extracting article text</p>
+    </div>
+
+    <div class="state-panel hidden" id="stateSuccess" aria-live="polite">
+
+      <div class="summary-meta-bar">
+        <span class="reading-time-badge" id="readingTime">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M6 3.5V6l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          4 min read
+        </span>
+        <button class="btn-ghost btn-copy" id="copyBtn" aria-label="Copy summary to clipboard">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+            <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M3 9H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          Copy
+        </button>
+      </div>
+
+      <section class="summary-section">
+        <h2 class="section-label">Summary</h2>
+        <ul class="bullet-list" id="bulletList" aria-label="Page summary bullets">
+          <li>Chrome extensions use Manifest V3, which replaces background pages with service workers for better performance and security.</li>
+          <li>The popup, content script, and service worker are three isolated environments that communicate via message passing.</li>
+          <li>Permissions must be declared upfront in manifest.json — only request what your extension actually needs.</li>
+          <li>Content scripts run inside the webpage context and can read the DOM, but cannot access extension APIs directly.</li>
+          <li>Storage via chrome.storage.local persists across popup closes and service worker sleep cycles.</li>
+        </ul>
+      </section>
+
+      <section class="summary-section">
+        <h2 class="section-label">Key Insights</h2>
+        <div class="insights-list" id="insightsList">
+          <div class="insight-card">
+            <span class="insight-dot" aria-hidden="true"></span>
+            <p>Service workers are ephemeral — never store state in global variables, use chrome.storage instead.</p>
+          </div>
+          <div class="insight-card">
+            <span class="insight-dot" aria-hidden="true"></span>
+            <p>The security boundary between worlds prevents one compromised script from affecting the entire extension.</p>
+          </div>
+        </div>
+      </section>
+
+      <div class="action-row">
+        <button class="btn-ghost btn-clear" id="clearBtnSuccess" aria-label="Clear summary and reset">
+          Clear
+        </button>
+      </div>
+
+    </div>
+
+    <div class="state-panel hidden" id="stateCached" aria-live="polite">
+
+      <div class="summary-meta-bar">
+        <span class="cached-badge" aria-label="Loaded from cache">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+            <path d="M9 5.5A3.5 3.5 0 1 1 5.5 2c1.2 0 2.3.6 3 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M8.5 1v2.5H6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Cached
+        </span>
+        <span class="reading-time-badge" id="cachedReadingTime">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M6 3.5V6l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          4 min read
+        </span>
+        <button class="btn-ghost btn-copy" id="cachedCopyBtn" aria-label="Copy summary to clipboard">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+            <rect x="4" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M3 9H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          Copy
+        </button>
+      </div>
+
+      <section class="summary-section">
+        <h2 class="section-label">Summary</h2>
+        <ul class="bullet-list" id="cachedBulletList" aria-label="Cached page summary bullets">
+          <li>Chrome extensions use Manifest V3, which replaces background pages with service workers.</li>
+          <li>The popup, content script, and service worker communicate via message passing.</li>
+          <li>Permissions must be declared upfront in manifest.json.</li>
+        </ul>
+      </section>
+
+      <section class="summary-section">
+        <h2 class="section-label">Key Insights</h2>
+        <div class="insights-list" id="cachedInsightsList">
+          <div class="insight-card">
+            <span class="insight-dot" aria-hidden="true"></span>
+            <p>Service workers are ephemeral — use chrome.storage instead of global variables.</p>
+          </div>
+        </div>
+      </section>
+
+      <div class="action-row">
+        <button class="btn-ghost btn-refresh" id="refreshBtn" aria-label="Re-summarize this page">
+          Re-summarize
+        </button>
+        <button class="btn-ghost btn-clear" id="clearBtnCached" aria-label="Clear cached summary">
+          Clear
+        </button>
+      </div>
+
+    </div>
+
+    <div class="state-panel hidden" id="stateError" aria-live="assertive" role="alert">
+      <div class="error-icon" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="12" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M14 9v6M14 18v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <p class="error-title" id="errorTitle">Couldn't summarize this page</p>
+      <p class="error-message" id="errorMessage">This page type isn't supported. Try opening an article or blog post.</p>
+      <button class="btn-primary btn-retry" id="retryBtn" aria-label="Retry summarizing this page">
+        Try Again
+      </button>
+      <button class="btn-ghost btn-clear" id="clearBtnError" aria-label="Reset extension">
+        Reset
+      </button>
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
