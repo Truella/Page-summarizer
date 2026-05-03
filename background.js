@@ -1,3 +1,5 @@
+importScripts("config.js");
+
 // Returns a dummy summary object to test the end-to-end message passing pipeline.
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.action !== "summarize") return;
