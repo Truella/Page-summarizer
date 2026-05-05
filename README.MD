@@ -6,7 +6,7 @@ A Manifest V3 Chrome Extension that extracts content from any webpage and return
 
 ## Demo
 
-[Demo Link](https://example.com)
+[Demo Link](https://www.loom.com/share/447cf7cbf7134c5a8b3f89ca6bf14a96)
 
 ---
 
